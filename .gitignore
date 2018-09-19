@@ -1,0 +1,14 @@
+
+\.vs/
+
+Build/
+
+obj/
+
+Packages/
+
+Temp/
+
+Assembly-CSharp\.csproj
+
+Flag\.sln
