@@ -3,55 +3,27 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
-
     GameObject PaletteUsing;
     public GameObject PrefabPalette;
 
-    float VelocityBall = 60;
+
     bool PowerBall = false;
-    bool PlayerisLocking = false;
 
-    float Velocity = 4;
+    [SyncVar(hook ="OnChangePlayerIsLocking")]
+    public bool PlayerisLocking = false;
 
+    int Width = 20;
+    int Height = 20;
+    Vector3 CenterPosition;
 
     Rigidbody2D body;
 
-    #region Movements
-    //Variables for movements
-    [Header("Movement")]
-    [SerializeField]
-    [Range(0, 50)]
-    float speedMoveHorizontal = 7.5f;
-    float horizontalMovement;
-    bool isMovingHorizontal = false;
-    public bool canMove = true;
+     [SyncVar(hook ="OnChangePlayerDefense")]
+    public bool Defense = false;
 
-    //Variables for jump
-    bool jumpInputPressed = false;
-    bool wasPressingJumpInput = false;
-    [SerializeField]
-    [Range(0, 50)]
-    float jumpForce = 8.5f;
-    bool hasDoubleJumped = false;
-
-    //Foot
-    public bool isGrounded = false;
-    Vector2 topLeft = new Vector2(-0.35f, -0.45f);
-    Vector2 bottomRight = new Vector2(0.35f, -0.55f);
-    public LayerMask groundMask;
-
-    //Fall
-    [SerializeField]
-    [Range(0, 5)]
-    float fallMultiplier = 2.5f;
-
-
-    //Walled
-    bool isWalled = false;
-    #endregion
-
+    //UI
     float Counter_Time;
     // Use this for initialization
     void Start()
@@ -59,55 +31,58 @@ public class PlayerController : MonoBehaviour
         body = GetComponent<Rigidbody2D>();
     }
 
-    // Update is called once per frame
-    void FixedUpdate()
+
+    public override void OnStartLocalPlayer()
     {
-        if (!PlayerisLocking)
+        GetComponent<SpriteRenderer>().color = Color.blue;
+    }
+
+    [Client]
+    private void Update()
+    {
+        if (isLocalPlayer)
         {
-
-
-            //Palette.position = smoothPosition;
-
-            if (Input.GetMouseButton(1))
+            if (!PlayerisLocking)
             {
-                InitMove();
-            }
+                if(transform.position != transform.position + new Vector3(0, Input.GetAxis("Mouse Y")))
+                CmdChangePositionPlayer(new Vector3(0, Input.GetAxis("Mouse Y")));
 
-            if (Input.GetMouseButton(0))
-            {
-                PowerBall = true;
-                Velocity = 8;
-                //PartSyst.Play();
-            }
-            else
-            {
-                Velocity = 4;
-                PowerBall = false;
-                //PartSyst.Stop();
+                if (Input.GetMouseButton(0)) {
+                    Debug.Log("PressMouse");
+                    if(Defense != true)
+                    CmdChangePlayerDefense(true);
+                }
+                else
+                {
+                    if(Defense != false)
+                    CmdChangePlayerDefense(false);
+                }
+
+                return;
             }
         }
     }
 
-    //public override void OnStartLocalPlayer()
-    //{
-    //    GetComponent<SpriteRenderer>().color = Color.blue;
-    //}
-
-
-    private void Update()
+    [Command]
+    private void CmdChangePositionPlayer(Vector3 position)
     {
+        transform.position += position;
+    }
 
-        
-        if (true)//isLocalPlayer)
-        {
-            transform.position += new Vector3(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
-            return;
-        }
-        else
-        {
-            transform.position += new Vector3(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
-            return;
-        }
+    [Command]
+    private void CmdChangePlayerDefense(bool defense)
+    {
+        Defense = defense;
+    }
+
+    void OnChangePlayerDefense(bool defense)
+    {
+        Defense = defense;
+    }
+
+    public void OnChangePlayerIsLocking(bool _change)
+    {
+        PlayerisLocking = _change;
     }
 
     public bool GetPowerBall()
@@ -115,32 +90,20 @@ public class PlayerController : MonoBehaviour
         return PowerBall;
     }
 
-    public void InitMove()
-    {
-        if (gameObject.tag == "Player1")
-        {
-            transform.GetComponent<Rigidbody2D>().velocity = Vector3.zero;
-            transform.position = new Vector3(-20, 0, 0);
-        }
-        if (gameObject.tag == "Player2")
-        {
-            transform.GetComponent<Rigidbody2D>().velocity = Vector3.zero;
-            transform.position = new Vector3(20, 0, 0);
-        }
-    }
-
-
     public void DelockPlayer()
     {
+
         PlayerisLocking = false;
     }
 
     public void lockPlayer()
     {
+
         PlayerisLocking = true;
     }
 
-    public void SetPalette(GameObject Palette){
+    [ClientRpc]
+    public void RpcSetPalette(GameObject Palette) {
         PaletteUsing = Palette;
     }
 
@@ -151,18 +114,41 @@ public class PlayerController : MonoBehaviour
 
     public void Init(GameObject Prefab)
     {
-       
-        if (true){//isLocalPlayer) {
+
+        if (isLocalPlayer) {
             PaletteUsing = Prefab;
-          //  CmdInitPalette();
+            //  CmdInitPalette();
         }
         else
         {
-        //    PaletteUsing = Instantiate(PrefabPalette);
+            //    PaletteUsing = Instantiate(PrefabPalette);
         }
 
-        
+
     }
+
+    [Command]
+    public void CmdCursorLock()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+    }
+
+    [ClientRpc]
+    public void RpcInitPositionPlayer(Vector3 position) {
+        CenterPosition = position;
+        transform.position = position;
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (CenterPosition != null) {
+            Gizmos.DrawLine(new Vector2(CenterPosition.x - Width / 2, CenterPosition.y - Height / 2), new Vector2(CenterPosition.x + Width / 2, CenterPosition.y - Height / 2));
+            Gizmos.DrawLine(new Vector2(CenterPosition.x - Width / 2, CenterPosition.y - Height / 2), new Vector2(CenterPosition.x - Width / 2, CenterPosition.y + Height / 2));
+            Gizmos.DrawLine(new Vector2(CenterPosition.x - Width / 2, CenterPosition.y + Height / 2), new Vector2(CenterPosition.x + Width / 2, CenterPosition.y + Height / 2));
+            Gizmos.DrawLine(new Vector2(CenterPosition.x + Width / 2, CenterPosition.y - Height / 2), new Vector2(CenterPosition.x + Width / 2, CenterPosition.y + Height / 2));
+        }
+    }
+
 
 }
 

@@ -4,10 +4,15 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Networking;
 
-public class GameCore : MonoBehaviour {
-
-    public GameObject BallPrefab;
+public class GameCore : NetworkBehaviour
+{
+    //Init Variables
+    [Header("PrefabNeed")]
+    [SerializeField] GameObject BallPrefab;
     [SerializeField] GameObject PrefabPalette;
+
+    Text TextPointPlayer_1;
+    Text TextPointPlayer_2;
 
     GameObject[] Players;
 
@@ -16,28 +21,25 @@ public class GameCore : MonoBehaviour {
 
     GameObject BallUsing;
 
-    [Header("UI")]
-    public Text TextPointPlayer_1;
-    public Text TextPointPlayer_2;
+    
 
-    bool P1_isReady;
-    bool P2_isReady;
+    bool p1IsReady;
+    bool p2IsReady;
 
     GameObject tmp;
-         GameObject tmp2;
-
-    public Text TimerStart;
+    GameObject tmp2;
 
     int pointPlayer1 = 0;
     int pointPlayer2 = 0;
+
     enum Game
     {
         LOBBY,
-        PARTY,
+        COUNTER,
+        IN_GAME,
+        PAUSE,
         WIN
     }
-
-    public bool Server;
     Game game = Game.LOBBY;
 
     float Time_Start = 0;
@@ -51,126 +53,136 @@ public class GameCore : MonoBehaviour {
     }
 
     // Use this for initialization
-    void Start() {
+    void Start()
+    {
         Cursor.visible = false;
 
     }
 
     bool play = false;
 
-    //[Server]
+    //Init Ui
+    void InitUI()
+    {
+        //for a scoring
+        TextPointPlayer_1 = GameObject.Find("TextPoint_Player1").GetComponent<Text>();
+        TextPointPlayer_2 = GameObject.Find("TextPoint_Player2").GetComponent<Text>();
+        
+        //Timer before each next game
+        GameObject.Find("Timer").GetComponent<TimerManager>().InitTextTimer(GameObject.Find("Timer").GetComponent<Text>());
+
+        //Image action
+    }
+
     private void Update()
     {
-        
-        if (Server)
-        {
-            if (Players.Length >= 2 && !play)
-            {
-                Debug.Log("InitGame");
-                play = true;
-                // Players[0].tag = "Player1";
-                //Players[1].tag = "Player2";
-                // Cursor.lockState = CursorLockMode.Locked;
-                GameObject tmp = Instantiate(PrefabPalette, Vector3.left, Quaternion.identity);
-                NetworkServer.Spawn(tmp);
-                Debug.Log(NetworkServer.objects.Count);
-
-
-                GameObject tmp2 = Instantiate(PrefabPalette, Vector3.right, Quaternion.identity);
-                NetworkServer.Spawn(tmp2);
-              //  Debug.Log(NetworkServer.objects.Count);
-
-
-            }
-        }
-        else
+        //Wait 2 Player before to init
+        if (!play)
         {
             Players = GameObject.FindGameObjectsWithTag("Player");
-            if (Players.Length >= 2 && !play) {
-                play = true;
-                tmp = Instantiate(PrefabPalette, Vector3.left * 25, Quaternion.identity);
-                tmp2 = Instantiate(PrefabPalette, Vector3.right * 25, Quaternion.identity);
+            if (Players.Length >= 2)
+            {
+                //Init Texts for scoring and timer
+                InitUI();
+
+                Debug.Log("Init Player");
+                //Tnit a players
+                InitPlayer();
 
                 Player_1 = Players[0];
-                Player_2 = Players[1];
-                tmp.GetComponent<StaffManager>().SetPlayerFollow(Player_1.transform);
-                tmp2.GetComponent<StaffManager>().SetPlayerFollow(Player_2.transform);
-            }
+                Player_1.name = "Player1";
 
+                Player_2 = Players[1];
+                Player_2.name = "Player2";
+
+                Player_1.GetComponent<ScoreManager>().InitTextScore(TextPointPlayer_1);
+                Player_2.GetComponent<ScoreManager>().InitTextScore(TextPointPlayer_2);
+
+                play = true;
+                Debug.Log("Player Ready");
+            }
         }
 
         switch (game)
         {
+        
             case Game.LOBBY:
-                
-                if (Players.Length >= 2)
+                if (play)
                 {
-                    Players[0].tag = "Player1";
-                    Players[1].tag = "Player2";
-                    Cursor.lockState = CursorLockMode.Locked;
-                    InitMatch();
-                    game = Game.PARTY;
-                }
-                else
-                {
-                    Players = GameObject.FindGameObjectsWithTag("Player");
+                    Debug.Log("Init Game");
+                    //Re
+                    InitGame();
+                    
+                    //
+                    Time_Start = 3;
+                    Counter_time = 0;
+                    game = Game.COUNTER;
+                    
                 }
                 break;
 
-            case Game.PARTY:
+            case Game.COUNTER:
                 Counter_time += Time.deltaTime;
                 if (Counter_time >= 1)
                 {
                     Counter_time = 0;
-                    Time_Start--;
-                    TimerStart.text = Time_Start.ToString();
-                    if (Time_Start == 0)
+
+                    GameObject.Find("Timer").GetComponent<TimerManager>().OnChangeTimer(Time_Start--);
+                    Debug.Log("Ready when " + Time_Start);
+                    if (GameObject.Find("Timer").GetComponent<TimerManager>().GetStartTime() < 0)
                     {
-                        TimerStart.enabled = false;
+                        if(isServer)
+                        GameObject.Find("Timer").GetComponent<TimerManager>().RpcLaunchTimer();
+
                         Player_1.GetComponentInChildren<PlayerController>().DelockPlayer();
                         Player_2.GetComponentInChildren<PlayerController>().DelockPlayer();
+                        if(isServer)
                         BallUsing.GetComponent<BallManager>().LaunchBall();
-
+                        game = Game.IN_GAME;
                     }
                 }
                 break;
         }
     }
 
-
-    //[Server]
-    public void Goal(Player goalFor)
+    
+    
+    [Server] //Server Init
+    private void InitGame()
     {
-        if (goalFor == Player.PLAYER_1)
-        {
-            pointPlayer1++;
-            TextPointPlayer_1.text = pointPlayer1.ToString();
-        }
+        InitPositionPlayers();
+        BallUsing = Instantiate(BallPrefab, Vector3.zero, Quaternion.identity);
+        NetworkServer.Spawn(BallUsing);
 
-        if (goalFor == Player.PLAYER_2)
-        {
-            pointPlayer2++;
-            TextPointPlayer_2.text = pointPlayer2.ToString();
-        }
-        Player_1.GetComponentInChildren<PlayerController>().lockPlayer();
-        Player_2.GetComponentInChildren<PlayerController>().lockPlayer();
-        InitMatch();
+        GameObject.Find("Timer").GetComponent<TimerManager>().RpcLaunchTimer();
+        Counter_time = 0;
+        game = Game.COUNTER;
+
     }
 
-    //[Server]
-    private void InitMatch()
+    [Server]
+    private void InitPlayer()
     {
-        //Players[1].GetComponent<PlayerController>().SetPalette(Instantiate(PrefabPalette));
-        //NetworkServer.Spawn(Players[1].GetComponent<PlayerController>().GetPalette());
-        // InitPalette();
-        Player_1.GetComponent<PlayerController>().InitMove();
-        Player_2.GetComponent<PlayerController>().InitMove();
-        BallUsing = Instantiate(BallPrefab, Vector3.zero, Quaternion.identity);
-        Time_Start = 3;
-        TimerStart.enabled = true;
-        TimerStart.text = Time_Start.ToString();
+        Player_1 = Players[0];
+        Player_1.name = "Player1";
+        
+        Player_1.GetComponent<PlayerController>().CmdCursorLock();
+        PrefabPalette.transform.GetChild(0).GetComponent<SpriteRenderer>().color = Color.blue;
+        tmp = Instantiate(PrefabPalette, Vector3.left * 25, Quaternion.identity);
+       
+        NetworkServer.Spawn(tmp);
+        tmp.GetComponent<StaffManager>().InitStaff(1, Player_1.transform);
 
+        Player_2 = Players[1];
+        Player_2.name = "Player2";
 
+        Player_2.GetComponent<PlayerController>().CmdCursorLock();
+        PrefabPalette.transform.GetChild(0).GetComponent<SpriteRenderer>().color = Color.red;
+        tmp2 = Instantiate(PrefabPalette, Vector3.right * 25, Quaternion.identity);
+        
+        NetworkServer.Spawn(tmp2);
+
+        tmp2.GetComponent<StaffManager>().InitStaff(2, Player_2.transform);
     }
 
     //public void InitPalette()
@@ -187,4 +199,21 @@ public class GameCore : MonoBehaviour {
     //    
     //    NetworkServer.Spawn(Players[0].GetComponent<PlayerController>().GetPalette());
     //}
+
+
+    public void InitPositionPlayers()
+    {
+        Player_1.GetComponent<PlayerController>().RpcInitPositionPlayer(new Vector3(-20, 0, 0));
+        Player_2.GetComponent<PlayerController>().RpcInitPositionPlayer(new Vector3(20, 0, 0));
+        tmp.GetComponent<StaffManager>().RpcinitSize();
+        tmp2.GetComponent<StaffManager>().RpcinitSize();
+    }
+
+    public void NextMatch()
+    {
+        Player_1.GetComponentInChildren<PlayerController>().lockPlayer();
+        Player_2.GetComponentInChildren<PlayerController>().lockPlayer();
+        game = Game.LOBBY;
+    }
+
 }
