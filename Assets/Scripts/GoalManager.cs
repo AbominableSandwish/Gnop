@@ -9,7 +9,6 @@ public class GoalManager : NetworkBehaviour {
     private float Time_goal;
 	
 	// Update is called once per frame
-    [Server]
 	void Update () {
 		if(Time_goal > 0.0f)
         {

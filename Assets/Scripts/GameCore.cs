@@ -51,7 +51,8 @@ public class GameCore : NetworkBehaviour
         //Cursor.visible = false;
     }
 
-    public void AddPlayer(GameObject new_player)
+    [Command]
+    public void CmdAddPlayer(GameObject new_player)
     {
         new_player.name = "Player" + Players.Count.ToString();
         Players.Add(new_player);
@@ -65,9 +66,6 @@ public class GameCore : NetworkBehaviour
         //for a scoring
         TextPointPlayer_1 = GameObject.Find("TextPoint_Player1").GetComponent<Text>();
         TextPointPlayer_2 = GameObject.Find("TextPoint_Player2").GetComponent<Text>();
-
-        //Timer before each next game
-        GameObject.Find("Timer").GetComponent<TimerManager>().InitTextTimer(GameObject.Find("Timer").GetComponent<Text>());
     }
 
 
@@ -120,8 +118,6 @@ public class GameCore : NetworkBehaviour
                     Debug.Log("Ready when " + Time_Start);
                     if (GameObject.Find("Timer").GetComponent<TimerManager>().GetStartTime() == 0)
                     {
-                        //if(isServer)
-                        //GameObject.Find("Timer").GetComponent<TimerManager>().RpcLaunchTimer();
 
                         Players[0].GetComponentInChildren<PlayerController>().DelockPlayer();
                         Players[1].GetComponentInChildren<PlayerController>().DelockPlayer();
@@ -148,6 +144,7 @@ public class GameCore : NetworkBehaviour
         game = Game.COUNTER;
     }
 
+
     public void InitPlayer(int id_player)
     {
         //Init and Spawn Staff Player
@@ -158,13 +155,13 @@ public class GameCore : NetworkBehaviour
         if (id_player == 0)
         {
             Staffs.Add(Instantiate(PrefabPalette, Vector3.left * 21, Quaternion.identity));
-            Players[id_player].GetComponent<ScoreManager>().InitTextScore(TextPointPlayer_1);
+            Players[id_player].GetComponent<ScoreManager>().Text_ScorePlayer = TextPointPlayer_1;
             Players[id_player].GetComponent<PlayerController>().InitScoreManager(TextPointPlayer_1);
         }
         if (id_player == 1)
         {
             Staffs.Add(Instantiate(PrefabPalette, Vector3.right * 21, Quaternion.identity));
-            Players[id_player].GetComponent<ScoreManager>().InitTextScore(TextPointPlayer_2);
+            Players[id_player].GetComponent<ScoreManager>().Text_ScorePlayer = TextPointPlayer_2;
             Players[id_player].GetComponent<PlayerController>().InitScoreManager(TextPointPlayer_2);
         }
 

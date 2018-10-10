@@ -41,7 +41,7 @@ public class CustomManager : NetworkManager
 
         NetworkServer.AddPlayerForConnection(conn, player, playerControllerId);
 
-        GameObject.Find("GameCore").GetComponent<GameCore>().AddPlayer(player);
+        GameObject.Find("GameCore").GetComponent<GameCore>().CmdAddPlayer(player);
 
         Debug.Log("Client has requested to get his player added to the game with Id: " + playerControllerId);
     }
@@ -112,17 +112,21 @@ public class CustomManager : NetworkManager
     public void ReturnMenu()
     {
         PanelTimeout.SetActive(false);
-        StopClient();
-        StopHost();
-        StopServer();
+        GameObject.Find("Goal_0").GetComponent<SpriteRenderer>().color = Color.gray;
+        GameObject.Find("Goal_1").GetComponent<SpriteRenderer>().color = Color.gray;
+        GameObject.Find("TextPoint_Player1").GetComponent<Text>().text = "0";
+        GameObject.Find("TextPoint_Player2").GetComponent<Text>().text = "0";
+        Shutdown();
     }
 
     public void EndGame()
     {
         GameObject.Find("PanelScore").SetActive(false);
-        StopClient();
-        StopHost();
-        StopServer();
+        GameObject.Find("Goal_0").GetComponent<SpriteRenderer>().color = Color.gray;
+        GameObject.Find("Goal_1").GetComponent<SpriteRenderer>().color = Color.gray;
+        GameObject.Find("TextPoint_Player1").GetComponent<Text>().text = "0";
+        GameObject.Find("TextPoint_Player2").GetComponent<Text>().text = "0";
+        Shutdown();
     }
 
     public override void OnClientError(NetworkConnection conn, int errorCode)

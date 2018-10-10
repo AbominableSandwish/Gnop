@@ -6,28 +6,21 @@ using UnityEngine.Networking;
 
 public class TimerManager : NetworkBehaviour {
 
-    [Header("UI")]
-    Text TimerStart;
-
     [SyncVar(hook = "OnChangeTimer")]
     public float Time_Start=3;
+
 
     public void OnChangeTimer(float time)
     {
         Time_Start = time;
-        TimerStart.text = Time_Start.ToString();
+        GetComponent<Text>().text = Time_Start.ToString();
     }
 
     [ClientRpc]
     public void RpcLaunchTimer()
     {
         Time_Start = 3;
-        TimerStart.enabled = true;
-    }
-
-    public void InitTextTimer(Text _text)
-    {
-        TimerStart = _text;
+        GetComponent<Text>().enabled = true;
     }
 
     public float GetStartTime() {
@@ -37,6 +30,6 @@ public class TimerManager : NetworkBehaviour {
     [ClientRpc]
     public void RpcStopTimer()
     {
-        TimerStart.enabled = false;
+        GetComponent<Text>().enabled = false;
     }
 }

@@ -22,6 +22,7 @@ public class ScoreManager : NetworkBehaviour
         Text_ScorePlayer.text = Score_Player.ToString();
     }
     
+
     public void InitTextScore(Text _text)
     {
         Text_ScorePlayer = _text;
