@@ -10,30 +10,21 @@ public class GameCore : NetworkBehaviour
     [Header("PrefabNeed")]
     [SerializeField] GameObject BallPrefab;
     [SerializeField] GameObject PrefabPalette;
+    [SerializeField] GameObject Panel_ScoreEnd;
 
     Text TextPointPlayer_1;
     Text TextPointPlayer_2;
 
-    GameObject[] Players;
-
-    GameObject Player_1;
-    GameObject Player_2;
+    List<GameObject> Players;
+    List<GameObject> Staffs;
 
     GameObject BallUsing;
 
-    
-
-    bool p1IsReady;
-    bool p2IsReady;
-
-    GameObject tmp;
-    GameObject tmp2;
-
-    int pointPlayer1 = 0;
-    int pointPlayer2 = 0;
+    bool play = false;
 
     enum Game
     {
+        INIT,
         LOBBY,
         COUNTER,
         IN_GAME,
@@ -55,11 +46,18 @@ public class GameCore : NetworkBehaviour
     // Use this for initialization
     void Start()
     {
-        Cursor.visible = false;
-
+        Players = new List<GameObject>(2);
+        Staffs = new List<GameObject>(2);
+        //Cursor.visible = false;
     }
 
-    bool play = false;
+    public void AddPlayer(GameObject new_player)
+    {
+        new_player.name = "Player" + Players.Count.ToString();
+        Players.Add(new_player);
+        Debug.Log("AddPlayer");
+    }
+
 
     //Init Ui
     void InitUI()
@@ -67,57 +65,48 @@ public class GameCore : NetworkBehaviour
         //for a scoring
         TextPointPlayer_1 = GameObject.Find("TextPoint_Player1").GetComponent<Text>();
         TextPointPlayer_2 = GameObject.Find("TextPoint_Player2").GetComponent<Text>();
-        
+
         //Timer before each next game
         GameObject.Find("Timer").GetComponent<TimerManager>().InitTextTimer(GameObject.Find("Timer").GetComponent<Text>());
-
-        //Image action
     }
+
 
     private void Update()
     {
-        //Wait 2 Player before to init
-        if (!play)
-        {
-            Players = GameObject.FindGameObjectsWithTag("Player");
-            if (Players.Length >= 2)
-            {
-                //Init Texts for scoring and timer
-                InitUI();
-
-                Debug.Log("Init Player");
-                //Tnit a players
-                InitPlayer();
-
-                Player_1 = Players[0];
-                Player_1.name = "Player1";
-
-                Player_2 = Players[1];
-                Player_2.name = "Player2";
-
-                Player_1.GetComponent<ScoreManager>().InitTextScore(TextPointPlayer_1);
-                Player_2.GetComponent<ScoreManager>().InitTextScore(TextPointPlayer_2);
-
-                play = true;
-                Debug.Log("Player Ready");
-            }
-        }
-
         switch (game)
         {
-        
+
             case Game.LOBBY:
+                //Wait 2 Player before to init
+                if (Players.Count >= 2 && !play)
+                {
+                    //Init Texts for scoring and timer
+                    InitUI();
+                    Debug.Log("Init Player");
+                    //Tnit a players
+
+                    InitPlayer(0);
+                    InitPlayer(1);               
+
+                    play = true;
+                    Debug.Log("Player Ready");
+                    game = Game.INIT;
+
+                }
+                break;
+
+            case Game.INIT:
                 if (play)
                 {
                     Debug.Log("Init Game");
-                    //Re
+                   
+                    //Init Game
                     InitGame();
-                    
-                    //
+
+                    //Init Timer
                     Time_Start = 3;
                     Counter_time = 0;
                     game = Game.COUNTER;
-                    
                 }
                 break;
 
@@ -129,15 +118,17 @@ public class GameCore : NetworkBehaviour
 
                     GameObject.Find("Timer").GetComponent<TimerManager>().OnChangeTimer(Time_Start--);
                     Debug.Log("Ready when " + Time_Start);
-                    if (GameObject.Find("Timer").GetComponent<TimerManager>().GetStartTime() < 0)
+                    if (GameObject.Find("Timer").GetComponent<TimerManager>().GetStartTime() == 0)
                     {
-                        if(isServer)
-                        GameObject.Find("Timer").GetComponent<TimerManager>().RpcLaunchTimer();
+                        //if(isServer)
+                        //GameObject.Find("Timer").GetComponent<TimerManager>().RpcLaunchTimer();
 
-                        Player_1.GetComponentInChildren<PlayerController>().DelockPlayer();
-                        Player_2.GetComponentInChildren<PlayerController>().DelockPlayer();
-                        if(isServer)
-                        BallUsing.GetComponent<BallManager>().LaunchBall();
+                        Players[0].GetComponentInChildren<PlayerController>().DelockPlayer();
+                        Players[1].GetComponentInChildren<PlayerController>().DelockPlayer();
+
+                        if (isServer)
+                            BallUsing.GetComponent<BallManager>().RpcLaunchBall();
+                        GameObject.Find("Timer").GetComponent<TimerManager>().RpcStopTimer();
                         game = Game.IN_GAME;
                     }
                 }
@@ -145,8 +136,6 @@ public class GameCore : NetworkBehaviour
         }
     }
 
-    
-    
     [Server] //Server Init
     private void InitGame()
     {
@@ -157,63 +146,73 @@ public class GameCore : NetworkBehaviour
         GameObject.Find("Timer").GetComponent<TimerManager>().RpcLaunchTimer();
         Counter_time = 0;
         game = Game.COUNTER;
-
     }
 
-    [Server]
-    private void InitPlayer()
+    public void InitPlayer(int id_player)
     {
-        Player_1 = Players[0];
-        Player_1.name = "Player1";
-        
-        Player_1.GetComponent<PlayerController>().CmdCursorLock();
+        //Init and Spawn Staff Player
+        Players[id_player].name = "Player" + id_player;
+
+        Players[id_player].GetComponent<PlayerController>().CmdCursorLock();
         PrefabPalette.transform.GetChild(0).GetComponent<SpriteRenderer>().color = Color.blue;
-        tmp = Instantiate(PrefabPalette, Vector3.left * 25, Quaternion.identity);
-       
-        NetworkServer.Spawn(tmp);
-        tmp.GetComponent<StaffManager>().InitStaff(1, Player_1.transform);
+        if (id_player == 0)
+        {
+            Staffs.Add(Instantiate(PrefabPalette, Vector3.left * 21, Quaternion.identity));
+            Players[id_player].GetComponent<ScoreManager>().InitTextScore(TextPointPlayer_1);
+            Players[id_player].GetComponent<PlayerController>().InitScoreManager(TextPointPlayer_1);
+        }
+        if (id_player == 1)
+        {
+            Staffs.Add(Instantiate(PrefabPalette, Vector3.right * 21, Quaternion.identity));
+            Players[id_player].GetComponent<ScoreManager>().InitTextScore(TextPointPlayer_2);
+            Players[id_player].GetComponent<PlayerController>().InitScoreManager(TextPointPlayer_2);
+        }
 
-        Player_2 = Players[1];
-        Player_2.name = "Player2";
-
-        Player_2.GetComponent<PlayerController>().CmdCursorLock();
-        PrefabPalette.transform.GetChild(0).GetComponent<SpriteRenderer>().color = Color.red;
-        tmp2 = Instantiate(PrefabPalette, Vector3.right * 25, Quaternion.identity);
-        
-        NetworkServer.Spawn(tmp2);
-
-        tmp2.GetComponent<StaffManager>().InitStaff(2, Player_2.transform);
+        NetworkServer.Spawn(Staffs[id_player]);
+        Staffs[id_player].GetComponent<StaffManager>().InitStaff(id_player, Players[id_player].transform);
     }
 
-    //public void InitPalette()
-    //{
-
-    //    Players[0].GetComponent<PlayerController>().SetPalette(Instantiate(PrefabPalette));
-    //    //Spawn the bullet on the Clients
-    //   // CmdSpawnPalette();
-    //}
-
-    //[Command]
-    //public void CmdSpawnPalette()
-    //{
-    //    
-    //    NetworkServer.Spawn(Players[0].GetComponent<PlayerController>().GetPalette());
-    //}
-
-
+    //Replace a positions at players and their Staffs
     public void InitPositionPlayers()
     {
-        Player_1.GetComponent<PlayerController>().RpcInitPositionPlayer(new Vector3(-20, 0, 0));
-        Player_2.GetComponent<PlayerController>().RpcInitPositionPlayer(new Vector3(20, 0, 0));
-        tmp.GetComponent<StaffManager>().RpcinitSize();
-        tmp2.GetComponent<StaffManager>().RpcinitSize();
+        Players[0].GetComponent<PlayerController>().RpcInitPositionPlayer(new Vector3(-21, 0, 0));
+        Players[1].GetComponent<PlayerController>().RpcInitPositionPlayer(new Vector3(21, 0, 0));
+        Staffs[0].GetComponent<StaffManager>().RpcinitSize();
+        Staffs[1].GetComponent<StaffManager>().RpcinitSize();
     }
 
     public void NextMatch()
     {
-        Player_1.GetComponentInChildren<PlayerController>().lockPlayer();
-        Player_2.GetComponentInChildren<PlayerController>().lockPlayer();
-        game = Game.LOBBY;
+        Players[0].GetComponentInChildren<PlayerController>().LockPlayer();
+        Players[1].GetComponentInChildren<PlayerController>().LockPlayer();
+        game = Game.INIT;
+
     }
+
+    public GameObject GetPanelScoreEnd()
+    {
+        return Panel_ScoreEnd;
+    }
+
+    //[Server]
+    //public void Changecolor(short id, Color color)g
+    //{
+    //    Debug.Log(color);
+    //    switch (id)
+    //    {
+    //        case 0:
+    //            Player1_Color = color;
+    //            GameObject.Find("Goal_0").GetComponent<GoalManager>().RpcChangeColorGoal(Player1_Color);
+    //            Staffs[0].GetComponent<StaffManager>().RpcChangeColorStaffPlayer(Player1_Color);
+    //            break;
+
+    //        case 1:
+    //            Player2_Color = color;
+    //            GameObject.Find("Goal_1").GetComponent<GoalManager>().RpcChangeColorGoal(Player2_Color);
+    //            Staffs[1].GetComponent<StaffManager>().RpcChangeColorStaffPlayer(Player2_Color);
+    //            break;
+    //    }           
+    //}
+
 
 }

@@ -11,6 +11,8 @@ public class StaffManager : NetworkBehaviour
     float Counter_time;
     float Counter_time_damage;
 
+    Color color_staff;
+
     private void Update()
     {
         if (target != null)
@@ -22,8 +24,8 @@ public class StaffManager : NetworkBehaviour
             {
                 if(GetComponent<SpriteRenderer>().color != Color.white)
                 RpcChangeColor(Color.white);
-
                 
+
                 Counter_time_damage += Time.deltaTime;
                 if (Counter_time_damage >= 0.25f)
                 {
@@ -62,6 +64,7 @@ public class StaffManager : NetworkBehaviour
     [ClientRpc]
     public void RpcTakeDamage(float boost_damage)
     {
+        if(transform.localScale.y > 1.5f)
         transform.localScale = new Vector2(transform.localScale.x, transform.localScale.y - 0.5f*boost_damage);
     }
 
@@ -79,13 +82,14 @@ public class StaffManager : NetworkBehaviour
         this.idPlayer = _player;
         this.target = _target;
         this.target.GetComponent<PlayerController>().RpcSetPalette(gameObject);
-        CmdChangeColorStaffPlayer();
+        RpcChangeColorStaffPlayer(Color.white);
     }
 
-    [Command]
-    void CmdChangeColorStaffPlayer()
+    [ClientRpc]
+    public void RpcChangeColorStaffPlayer(Color color)
     {
-        transform.GetChild(0).GetComponent<SpriteRenderer>().color = Color.blue;
+        color_staff = color;
+        transform.GetChild(0).GetComponent<SpriteRenderer>().color = color_staff;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)

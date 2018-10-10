@@ -56,6 +56,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PrefabPalette: {fileID: 1607138340858274, guid: f56404e84cde80541bf25287784deb47,
     type: 2}
+  Prefab_colorSelection: {fileID: 1760433266433528, guid: ed6f4b7bae73d524f845effb94afbfca,
+    type: 2}
   PlayerisLocking: 1
   Defense: 0
 --- !u!114 &114503609677753704

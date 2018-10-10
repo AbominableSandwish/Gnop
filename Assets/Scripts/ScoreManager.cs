@@ -8,28 +8,32 @@ public class ScoreManager : NetworkBehaviour
 {
     [SyncVar(hook = "OnChangeScore")]
     public int Score_Player = 0;
+
     public Text Text_ScorePlayer;
 
-    
     public void Goal()
     {
         if (!isServer)
         {
-            Debug.Log("ICI");
             return;
         }
- 
-        Score_Player++;
+
+        OnChangeScore(Score_Player+1);
+        Text_ScorePlayer.text = Score_Player.ToString();
     }
     
-    public void InitTextScore(Text _text) {
+    public void InitTextScore(Text _text)
+    {
         Text_ScorePlayer = _text;
     }
 
-
-    void OnChangeScore(int Score_Player)
+    void OnChangeScore(int score_Player)
     {
-        Text_ScorePlayer.text = Score_Player.ToString();
+        Score_Player = score_Player;
     }
 
+    public int GetScore()
+    {
+        return Score_Player;
+    }
 }

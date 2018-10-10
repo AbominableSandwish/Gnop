@@ -7,16 +7,10 @@ using UnityEngine.Networking;
 public class TimerManager : NetworkBehaviour {
 
     [Header("UI")]
-    
-    public Text TimerStart;
-    // Use this for initialization
-    void Start () {
-		
-	}
+    Text TimerStart;
 
     [SyncVar(hook = "OnChangeTimer")]
     public float Time_Start=3;
-
 
     public void OnChangeTimer(float time)
     {
@@ -35,7 +29,6 @@ public class TimerManager : NetworkBehaviour {
     {
         TimerStart = _text;
     }
-
 
     public float GetStartTime() {
         return Time_Start;
