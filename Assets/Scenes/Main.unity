@@ -721,7 +721,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   backgroundSize: 50
-  ParallaxSpeed: 0.2
+  parallaxSpeed: 0
 --- !u!4 &74548159
 Transform:
   m_ObjectHideFlags: 0
@@ -817,7 +817,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 298508450}
+      - m_Target: {fileID: 0}
         m_MethodName: EndGame
         m_Mode: 1
         m_Arguments:
@@ -1640,9 +1640,7 @@ GameObject:
   m_Component:
   - component: {fileID: 298508447}
   - component: {fileID: 298508445}
-  - component: {fileID: 298508448}
-  - component: {fileID: 298508449}
-  - component: {fileID: 298508450}
+  - component: {fileID: 298508446}
   m_Layer: 0
   m_Name: Network Manager
   m_TagString: Untagged
@@ -1665,52 +1663,7 @@ MonoBehaviour:
   showGUI: 1
   offsetX: 0
   offsetY: 0
---- !u!4 &298508447
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 298508444}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &298508448
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 298508444}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4b70d00a8933ca74d8e4202318298a98, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &298508449
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 298508444}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 59c94bf6afe1ab64f9f421ca0bc8758a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_BroadcastPort: 7777
-  m_BroadcastKey: 2222
-  m_BroadcastVersion: 1
-  m_BroadcastSubVersion: 1
-  m_BroadcastInterval: 1000
-  m_UseNetworkManager: 1
-  m_BroadcastData: PHILLIP
-  m_ShowGUI: 1
-  m_OffsetX: 0
-  m_OffsetY: 0
---- !u!114 &298508450
+--- !u!114 &298508446
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
@@ -1718,7 +1671,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 298508444}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b69f19546d990d940bd01f01e502ae40, type: 3}
+  m_Script: {fileID: 11500000, guid: 09ea79a0c2caee94ea08bc28dc85cad6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_NetworkPort: 7777
@@ -1739,6 +1692,8 @@ MonoBehaviour:
   m_SpawnPrefabs:
   - {fileID: 1607138340858274, guid: f56404e84cde80541bf25287784deb47, type: 2}
   - {fileID: 1758188946040158, guid: c490bc69b42e03141a80e97eebaec469, type: 2}
+  - {fileID: 1351936012767644, guid: 5ae96fb6223a0694694326e3066dbf05, type: 2}
+  - {fileID: 1597226032314098, guid: 92ef8c11dafdcd24bace0fca74755080, type: 2}
   m_CustomConfig: 0
   m_MaxConnections: 4
   m_ConnectionConfig:
@@ -1781,7 +1736,7 @@ MonoBehaviour:
     m_MaxTimerTimeout: 12000
     m_MinNetSimulatorTimeout: 1
     m_MaxNetSimulatorTimeout: 12000
-  m_Channels: 0500000000000000
+  m_Channels: 
   m_UseWebSockets: 0
   m_UseSimulator: 0
   m_SimulatedLatency: 1
@@ -1794,7 +1749,20 @@ MonoBehaviour:
   matchSize: 4
   isNetworkActive: 0
   matchMaker: {fileID: 0}
-  PanelTimeout: {fileID: 2040173237}
+  PanelTimeout: {fileID: 0}
+--- !u!4 &298508447
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 298508444}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &299177672
 GameObject:
   m_ObjectHideFlags: 0
@@ -2727,7 +2695,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &431035173
 Transform:
   m_ObjectHideFlags: 0
@@ -2939,7 +2907,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 298508450}
+      - m_Target: {fileID: 0}
         m_MethodName: ReturnMenu
         m_Mode: 1
         m_Arguments:
@@ -4626,7 +4594,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ccd31869bc332f64393ee49b69bd65d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Time_Start: 3
+  timeStart: 3
 --- !u!1 &807917565
 GameObject:
   m_ObjectHideFlags: 0
@@ -5994,17 +5962,17 @@ RectTransform:
     type: 2}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 970776230}
-  m_LocalRotation: {x: -0, y: -0, z: 0.0074431617, w: -0.99997234}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1470639972}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -0.85300004}
-  m_AnchorMin: {x: 0.85, y: 0.75}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.8543011, y: 0.7296572}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 1.500061, y: 3.5}
-  m_SizeDelta: {x: -3, y: -7}
+  m_AnchoredPosition: {x: 0.50006104, y: 4.5}
+  m_SizeDelta: {x: -1, y: -9}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &970776232
 MonoBehaviour:
@@ -6237,6 +6205,7 @@ GameObject:
   - component: {fileID: 1054705961}
   - component: {fileID: 1054705960}
   - component: {fileID: 1054705962}
+  - component: {fileID: 1054705963}
   m_Layer: 5
   m_Name: CanvasUI
   m_TagString: Untagged
@@ -6304,6 +6273,38 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &1054705963
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1054705958}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 372142912, guid: dc443db3e92b4983b9738c1131f555cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SceneId:
+    m_Value: 0
+  m_AssetId:
+    i0: 0
+    i1: 0
+    i2: 0
+    i3: 0
+    i4: 0
+    i5: 0
+    i6: 0
+    i7: 0
+    i8: 0
+    i9: 0
+    i10: 0
+    i11: 0
+    i12: 0
+    i13: 0
+    i14: 0
+    i15: 0
+  m_ServerOnly: 0
+  m_LocalPlayerAuthority: 0
 --- !u!1 &1076866340
 GameObject:
   m_ObjectHideFlags: 0
@@ -8688,8 +8689,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1658992135}
   - component: {fileID: 1658992133}
-  - component: {fileID: 1658992136}
   - component: {fileID: 1658992134}
+  - component: {fileID: 1658992136}
   m_Layer: 0
   m_Name: GameCore
   m_TagString: Untagged
@@ -8708,10 +8709,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05521e7aacef7e64588b081939ebcacb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BallPrefab: {fileID: 1758188946040158, guid: c490bc69b42e03141a80e97eebaec469, type: 2}
-  PrefabPalette: {fileID: 1607138340858274, guid: f56404e84cde80541bf25287784deb47,
+  ballPrefab: {fileID: 1758188946040158, guid: c490bc69b42e03141a80e97eebaec469, type: 2}
+  prefabPalette: {fileID: 1607138340858274, guid: f56404e84cde80541bf25287784deb47,
     type: 2}
-  Panel_ScoreEnd: {fileID: 1594703393}
+  panelScoreEnd: {fileID: 2040173237}
+  textPointPlayer_1: {fileID: 352276159}
+  textPointPlayer_2: {fileID: 970776232}
+  timeManager: {fileID: 786270582}
+  players: []
 --- !u!114 &1658992134
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8768,10 +8773,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 353b19583b0c8d643a17e3a0929a4c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SpawActionPlayer1: {fileID: 915605286}
-  SpawActionPlayer2: {fileID: 870325543}
-  PrefabGood: {fileID: 1351936012767644, guid: 5ae96fb6223a0694694326e3066dbf05, type: 2}
-  PrefabPerfect: {fileID: 1597226032314098, guid: 92ef8c11dafdcd24bace0fca74755080,
+  spawActionPlayer1: {fileID: 915605286}
+  spawActionPlayer2: {fileID: 870325543}
+  prefabGood: {fileID: 1351936012767644, guid: 5ae96fb6223a0694694326e3066dbf05, type: 2}
+  prefabPerfect: {fileID: 1597226032314098, guid: 92ef8c11dafdcd24bace0fca74755080,
     type: 2}
 --- !u!1 &1661741769
 GameObject:
